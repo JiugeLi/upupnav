@@ -16,3 +16,4 @@ migrations_dir = "drizzle"
 # Workers AI 绑定
 [ai]
 binding = "AI"
+remote = true

@@ -38,7 +38,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
         body: JSON.stringify({ newPassword }),
       });
 
-      const data = await res.json();
+      const data = await res.json() as { message?: string };
 
       if (res.ok) {
         setSuccess('密码修改成功！');
