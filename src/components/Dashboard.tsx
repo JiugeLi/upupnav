@@ -271,7 +271,6 @@ export default function Dashboard() {
               <X size={20} />
             </button>
           </div>
-          <p className="text-xs text-slate-400 font-medium tracking-wider uppercase">Your Personal Navigation</p>
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
