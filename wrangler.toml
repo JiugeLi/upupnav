@@ -1,0 +1,18 @@
+name = "cloud-nav"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+main = ".open-next/worker.js"
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
+
+# D1 数据库配置
+# 注意：database_id 相对安全，即使公开也需要 Cloudflare 账号权限才能访问
+# 如果你想完全隐藏，可以创建 wrangler.local.toml（已在 .gitignore 中）
+[[d1_databases]]
+binding = "DB"
+database_name = "upupnav"
+database_id = "ba95fd9d-5306-4cee-b3c0-b141ca87a776"
+migrations_dir = "drizzle"
+
+# Workers AI 绑定
+[ai]
+binding = "AI"
