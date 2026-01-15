@@ -78,15 +78,6 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* 提示信息 */}
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
-            <AlertCircle className="text-amber-600 flex-shrink-0" size={20} />
-            <div className="text-sm text-amber-800">
-              <p className="font-medium mb-1">注意事项</p>
-              <p>密码修改功能仅在生产环境可用。本地开发环境请使用默认密码 <code className="bg-amber-100 px-1 rounded">admin123</code></p>
-            </div>
-          </div>
-
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
               {error}

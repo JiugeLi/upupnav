@@ -14,6 +14,6 @@ database_id = "ba95fd9d-5306-4cee-b3c0-b141ca87a776"
 migrations_dir = "drizzle"
 
 # Workers AI 绑定
+# 注意：本地开发时会连接远程 AI 服务
 [ai]
 binding = "AI"
-remote = true

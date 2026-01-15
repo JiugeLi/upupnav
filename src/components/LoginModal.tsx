@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { X, Lock, Loader2 } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
+import { saveUserSession } from '@/lib/user-auth';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -14,21 +16,73 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     
-    // 简单密码验证
-    // 默认密码: admin123，可通过环境变量 ADMIN_PASSWORD 修改
-    if (password === 'admin123') {
-      onLogin();
-      onClose();
-      setPassword('');
-    } else {
-      setError('密码错误');
+    try {
+      // 调用 API 验证密码
+      const res = await fetch('/api/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await res.json() as { valid: boolean };
+
+      if (data.valid) {
+        // 管理员登录 - 保存特殊会话
+        saveUserSession({
+          userId: 1, // 管理员用户 ID
+          email: 'admin@local',
+          name: 'Admin',
+          avatar: null,
+          isAdmin: true,
+        });
+        onLogin();
+        onClose();
+        setPassword('');
+      } else {
+        setError('密码错误');
+      }
+    } catch (error) {
+      setError('验证失败，请重试');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: credentialResponse.credential }),
+      });
+
+      const data = await res.json() as { success: boolean; user?: any; message?: string };
+
+      if (data.success && data.user) {
+        // 保存用户会话
+        saveUserSession(data.user);
+        onLogin();
+        onClose();
+      } else {
+        setError(data.message || 'Google 登录失败');
+      }
+    } catch (error) {
+      setError('登录失败，请重试');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google 登录失败');
   };
 
   return (
@@ -39,7 +93,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
       />
       <div className="relative bg-white rounded-2xl w-full max-w-sm shadow-2xl transform transition-all overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-800">管理员登录</h2>
+          <h2 className="text-lg font-bold text-slate-800">登录</h2>
           <button 
             onClick={onClose}
             className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
@@ -48,8 +102,35 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
           </button>
         </div>
 
-        <div className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="p-6 space-y-6">
+          {/* Google 登录 */}
+          <div>
+            <div className="text-sm text-slate-600 mb-3 text-center">使用 Google 账号登录</div>
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                useOneTap
+                text="continue_with"
+                shape="rectangular"
+                size="large"
+                width="300"
+              />
+            </div>
+          </div>
+
+          {/* 分隔线 */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-slate-500">或使用管理员密码</span>
+            </div>
+          </div>
+
+          {/* 密码登录 */}
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">管理密码</label>
               <div className="relative">
@@ -62,7 +143,6 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
                   placeholder="请输入管理密码"
-                  autoFocus
                 />
               </div>
             </div>
@@ -74,7 +154,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
               </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={onClose}

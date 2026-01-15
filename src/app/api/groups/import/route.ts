@@ -3,6 +3,7 @@ import { createDb } from '@/db';
 import { groups, websites } from '@/db/schema';
 import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
+import { getCurrentUserId } from '@/lib/get-current-user';
 
 interface ImportData {
     groups: Array<{
@@ -26,6 +27,13 @@ export async function POST(req: Request) {
   try {
     const { env } = getCloudflareContext();
     const db = createDb(env.DB);
+    
+    // 获取当前用户 ID
+    const userId = getCurrentUserId(req);
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
     const body = await req.json() as { data: ImportData; mode: 'merge' | 'replace' };
     const { data, mode = 'merge' } = body; 
 
@@ -33,10 +41,10 @@ export async function POST(req: Request) {
       return new NextResponse('Invalid data format', { status: 400 });
     }
 
-    // If replace, delete everything
+    // If replace, delete everything for this user
     if (mode === 'replace') {
-      await db.delete(websites);
-      await db.delete(groups);
+      await db.delete(websites).where(eq(websites.user_id, userId));
+      await db.delete(groups).where(eq(groups.user_id, userId));
     }
 
     // Simple import logic
@@ -44,6 +52,7 @@ export async function POST(req: Request) {
 
     for (const grp of data.groups) {
       const result = await db.insert(groups).values({
+          user_id: userId,
           name: grp.name,
           icon: grp.icon,
           sort_order: grp.sort_order,
@@ -59,6 +68,7 @@ export async function POST(req: Request) {
       
       if (newGroupId) {
         await db.insert(websites).values({
+            user_id: userId,
             group_id: newGroupId,
             name: site.name,
             url: site.url,

@@ -1,16 +1,31 @@
 import { sql } from 'drizzle-orm';
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
+// 用户表
+export const users = sqliteTable('users', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  email: text('email').notNull().unique(),
+  name: text('name'),
+  avatar: text('avatar'),
+  google_id: text('google_id').unique(),
+  created_at: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+  last_login: integer('last_login', { mode: 'timestamp' }),
+});
+
+// 分组表（添加 user_id）
 export const groups = sqliteTable('groups', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  user_id: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   name: text('name').notNull(),
   icon: text('icon').default('📁').notNull(),
   sort_order: integer('sort_order').default(0).notNull(),
   created_at: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
+// 网站表（添加 user_id）
 export const websites = sqliteTable('websites', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  user_id: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   group_id: integer('group_id').references(() => groups.id, { onDelete: 'cascade' }).notNull(),
   name: text('name').notNull(),
   url: text('url').notNull(),
@@ -26,7 +41,18 @@ export const websites = sqliteTable('websites', {
   is_public: integer('is_public').default(1).notNull(),
 });
 
+// 管理员表（保留用于密码登录的管理员）
+export const admin = sqliteTable('admin', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  password_hash: text('password_hash').notNull(),
+  updated_at: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
 export type Group = typeof groups.$inferSelect;
 export type NewGroup = typeof groups.$inferInsert;
 export type Website = typeof websites.$inferSelect;
 export type NewWebsite = typeof websites.$inferInsert;
+export type Admin = typeof admin.$inferSelect;
+export type NewAdmin = typeof admin.$inferInsert;

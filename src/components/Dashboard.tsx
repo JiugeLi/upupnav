@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { AUTH_KEY } from '@/lib/auth';
+import { getUserSession, clearUserSession, isUserLoggedIn } from '@/lib/user-auth';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/api-client';
 import { Group, Website } from '@/types';
 import LoginModal from './LoginModal';
 import GroupModal from './GroupModal';
@@ -84,6 +85,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userSession, setUserSession] = useState<ReturnType<typeof getUserSession>>(null);
 
   // Modals
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -96,10 +98,17 @@ export default function Dashboard() {
 
   // 初始化数据
   useEffect(() => {
-    fetchData();
-    // 检查本地登录状态
-    const authStatus = localStorage.getItem(AUTH_KEY);
-    setIsAdmin(authStatus === 'true');
+    // 检查登录状态
+    const session = getUserSession();
+    setUserSession(session);
+    setIsAdmin(session?.isAdmin || false);
+    
+    if (session) {
+      fetchData();
+    } else {
+      setLoading(false);
+      setShowLoginModal(true);
+    }
   }, []);
 
   const fetchData = async (force = false) => {
@@ -108,50 +117,51 @@ export default function Dashboard() {
     }
 
     try {
-      const groupsRes = await fetch('/api/groups');
-      if (groupsRes.ok) {
-        const groupsData = await groupsRes.json() as Group[];
-        setGroups(groupsData);
-        if (groupsData.length > 0 && !activeGroupId) {
-          setActiveGroupId(groupsData[0].id);
-        }
-        setLoading(false);
+      const groupsData = await apiGet<Group[]>('/api/groups');
+      setGroups(groupsData);
+      if (groupsData.length > 0 && !activeGroupId) {
+        setActiveGroupId(groupsData[0].id);
       }
 
-      const websitesRes = await fetch('/api/websites');
-      if (websitesRes.ok) {
-        const websitesData = await websitesRes.json() as Website[];
-        setWebsites(websitesData);
-      }
+      const websitesData = await apiGet<Website[]>('/api/websites');
+      setWebsites(websitesData);
+      
+      setLoading(false);
     } catch (error) {
       console.error('Failed to fetch data', error);
       setLoading(false);
+      // 如果是 401 错误，清除会话并显示登录
+      if (error instanceof Error && error.message.includes('401')) {
+        clearUserSession();
+        setUserSession(null);
+        setShowLoginModal(true);
+      }
     }
   };
 
   const handleLogin = () => {
-    localStorage.setItem(AUTH_KEY, 'true');
-    setIsAdmin(true);
+    const session = getUserSession();
+    setUserSession(session);
+    setIsAdmin(session?.isAdmin || false);
+    fetchData(true);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem(AUTH_KEY);
+    clearUserSession();
+    setUserSession(null);
     setIsAdmin(false);
+    setGroups([]);
+    setWebsites([]);
+    setShowLoginModal(true);
   };
 
   // CRUD Handlers
   const handleGroupSubmit = async (data: Partial<Group>) => {
     try {
       if (editingGroup) {
-        await fetch(`/api/groups/${editingGroup.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(data),
-        });
+        await apiPut(`/api/groups/${editingGroup.id}`, data);
       } else {
-        await fetch('/api/groups', {
-          method: 'POST',
-          body: JSON.stringify(data),
-        });
+        await apiPost('/api/groups', data);
       }
       fetchData(true);
       setShowGroupModal(false);
@@ -164,7 +174,7 @@ export default function Dashboard() {
   const handleDeleteGroup = async (id: number) => {
     if (!confirm('确定删除此分组及其所有网站吗？')) return;
     try {
-      await fetch(`/api/groups/${id}`, { method: 'DELETE' });
+      await apiDelete(`/api/groups/${id}`);
       fetchData(true);
       if (activeGroupId === id) setActiveGroupId(groups[0]?.id || null);
     } catch (error) {
@@ -175,15 +185,9 @@ export default function Dashboard() {
   const handleWebsiteSubmit = async (data: Partial<Website>) => {
     try {
       if (editingWebsite) {
-        await fetch(`/api/websites/${editingWebsite.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(data),
-        });
+        await apiPut(`/api/websites/${editingWebsite.id}`, data);
       } else {
-        await fetch('/api/websites', {
-          method: 'POST',
-          body: JSON.stringify(data),
-        });
+        await apiPost('/api/websites', data);
       }
       fetchData(true);
       setShowWebsiteModal(false);
@@ -196,7 +200,7 @@ export default function Dashboard() {
   const handleDeleteWebsite = async (id: number) => {
     if (!confirm('确定删除此网站吗？')) return;
     try {
-      await fetch(`/api/websites/${id}`, { method: 'DELETE' });
+      await apiDelete(`/api/websites/${id}`);
       fetchData(true);
     } catch (error) {
       console.error('Error deleting website', error);
@@ -205,7 +209,7 @@ export default function Dashboard() {
 
   const handleWebsiteClick = async (website: Website) => {
     try {
-      fetch(`/api/websites/${website.id}/click`, { method: 'POST' });
+      apiPost(`/api/websites/${website.id}/click`, {});
     } catch (e) {}
     window.open(website.url, '_blank');
   };
@@ -478,7 +482,7 @@ export default function Dashboard() {
                         <h3 className="font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
                           {website.name}
                         </h3>
-                        {website.click_count > 0 && (
+                        {(website.click_count ?? 0) > 0 && (
                           <div className="flex items-center gap-1 mt-1 text-xs text-slate-500">
                             <span>🔥</span>
                             <span>{website.click_count}</span>

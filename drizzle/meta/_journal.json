@@ -8,6 +8,20 @@
       "when": 1765524159012,
       "tag": "0000_silky_trauma",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1768460470872,
+      "tag": "0001_talented_captain_stacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1768461183806,
+      "tag": "0002_mighty_firestar",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,8 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { createDb } from '@/db';
 import { websites } from '@/db/schema';
 import { NextResponse } from 'next/server';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
+import { getCurrentUserId } from '@/lib/get-current-user';
 
 export async function GET(
   req: Request,
@@ -13,7 +14,16 @@ export async function GET(
     const { env } = getCloudflareContext();
     const db = createDb(env.DB);
     
-    const result = await db.select().from(websites).where(eq(websites.id, parseInt(id)));
+    // 获取当前用户 ID
+    const userId = getCurrentUserId(req);
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    const result = await db.select().from(websites).where(and(
+      eq(websites.id, parseInt(id)),
+      eq(websites.user_id, userId)
+    ));
 
     if (!result.length) {
       return new NextResponse('Website not found', { status: 404 });
@@ -34,6 +44,13 @@ export async function PUT(
         const { id } = await params;
         const { env } = getCloudflareContext();
         const db = createDb(env.DB);
+        
+        // 获取当前用户 ID
+        const userId = getCurrentUserId(req);
+        if (!userId) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        
         const body = await req.json() as {
             group_id: string;
             name: string;
@@ -71,7 +88,14 @@ export async function PUT(
             username,
             password,
             sort_order,
-        }).where(eq(websites.id, parseInt(id))).returning();
+        }).where(and(
+          eq(websites.id, parseInt(id)),
+          eq(websites.user_id, userId)
+        )).returning();
+        
+        if (result.length === 0) {
+          return NextResponse.json({ error: 'Website not found' }, { status: 404 });
+        }
         
         return NextResponse.json(result[0]);
     } catch (error) {
@@ -88,12 +112,21 @@ export async function DELETE(
         const { id } = await params;
         const { env } = getCloudflareContext();
         const db = createDb(env.DB);
+        
+        // 获取当前用户 ID
+        const userId = getCurrentUserId(req);
+        if (!userId) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
         if (!id) {
             return new NextResponse('Website ID is required', { status: 400 });
         }
 
-        await db.delete(websites).where(eq(websites.id, parseInt(id)));
+        await db.delete(websites).where(and(
+          eq(websites.id, parseInt(id)),
+          eq(websites.user_id, userId)
+        ));
 
         return NextResponse.json({ message: 'Website deleted' });
     } catch (error) {
