@@ -233,11 +233,11 @@ export default function Dashboard() {
 
   const activeGroup = groups.find(g => g.id === activeGroupId);
 
-  // 过滤掉没有网站的空分组（仅对非管理员生效，管理员需要看到空分组以便管理）
+  // 过滤掉没有网站的空分组（仅对未登录用户生效，登录用户需要看到空分组以便管理）
   const visibleGroups = useMemo(() => {
-    if (isAdmin) return groups;
+    if (userSession) return groups;
     return groups.filter(group => websites.some(w => w.group_id === group.id));
-  }, [groups, websites, isAdmin]);
+  }, [groups, websites, userSession]);
 
   if (loading) return (
     <div className="flex items-center justify-center h-screen bg-slate-50">
@@ -280,7 +280,7 @@ export default function Dashboard() {
         <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
           <div className="flex items-center justify-between px-2 mb-2">
             <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Groups</h2>
-            {isAdmin && (
+            {userSession && (
               <button 
                 onClick={() => { setEditingGroup(null); setShowGroupModal(true); }}
                 className="p-1.5 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-lg transition-colors"
@@ -311,7 +311,7 @@ export default function Dashboard() {
                 <span className="font-medium truncate">{group.name}</span>
               </div>
               
-              {isAdmin && (
+              {userSession && (
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={(e) => { e.stopPropagation(); setEditingGroup(group); setShowGroupModal(true); }}
@@ -328,7 +328,7 @@ export default function Dashboard() {
                 </div>
               )}
               
-              {!isAdmin && activeGroupId === group.id && (
+              {!userSession && activeGroupId === group.id && (
                 <ChevronRight size={16} className="text-blue-400" />
               )}
             </div>
@@ -336,15 +336,17 @@ export default function Dashboard() {
         </div>
 
         <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-          {isAdmin ? (
+          {userSession ? (
             <div className="space-y-2">
-              <button
-                onClick={() => setShowSettingsModal(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 rounded-xl transition-all shadow-sm"
-              >
-                <Settings size={18} />
-                <span>设置</span>
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 rounded-xl transition-all shadow-sm"
+                >
+                  <Settings size={18} />
+                  <span>设置</span>
+                </button>
+              )}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
@@ -398,7 +400,7 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center gap-4 ml-auto lg:ml-0">
-            {isAdmin && (
+            {userSession && (
               <button
                 onClick={() => { setEditingWebsite(null); setShowWebsiteModal(true); }}
                 className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-95"
@@ -443,9 +445,9 @@ export default function Dashboard() {
                 <p className="text-slate-500 max-w-sm mx-auto leading-relaxed mb-6">
                   {searchQuery ? `未找到 "${searchQuery}" 相关的网站` : "该分组暂无网站，点击下方按钮添加！"}
                 </p>
-                {isAdmin && !searchQuery && (
+                {userSession && !searchQuery && (
                   <div className="flex gap-4">
-                    {!activeGroupId && (
+                    {!activeGroupId && userSession && (
                       <button
                         onClick={() => setShowGroupModal(true)}
                         className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-all shadow-md hover:shadow-indigo-500/30"
@@ -498,7 +500,7 @@ export default function Dashboard() {
                         </p>
                     </div>
 
-                    {isAdmin && (
+                    {userSession && (
                       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white shadow-sm rounded-lg p-1 border border-slate-100 z-20">
                         <button
                           onClick={(e) => { e.stopPropagation(); setEditingWebsite(website); setShowWebsiteModal(true); }}
