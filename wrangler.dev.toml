@@ -1,0 +1,17 @@
+name = "nav-dev"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+main = ".open-next/worker.js"
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
+
+# D1 数据库配置 - 开发环境
+[[d1_databases]]
+binding = "DB"
+database_name = "navdev-dev"
+database_id = "76015c80-4120-4a97-bee0-ed71da98674b"
+migrations_dir = "drizzle"
+
+# Workers AI 绑定
+[ai]
+binding = "AI"
+remote = true

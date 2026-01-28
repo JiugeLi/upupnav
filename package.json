@@ -1,5 +1,5 @@
 {
-  "name": "cloud-nav",
+  "name": "nav-dev",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,12 +9,13 @@
     "build:worker": "opennextjs-cloudflare build",
     "preview": "opennextjs-cloudflare preview",
     "deploy": "npm run build:worker && npx wrangler deploy",
+    "deploy:dev": "npm run build:worker && npx wrangler deploy --config wrangler.dev.toml",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "drizzle-kit generate",
     "db:up": "drizzle-kit up",
-    "db:migrate:local": "wrangler d1 migrations apply upupnav --local",
-    "db:migrate:prod": "wrangler d1 migrations apply upupnav --remote"
+    "db:migrate:local": "wrangler d1 migrations apply navdev --local",
+    "db:migrate:prod": "wrangler d1 migrations apply navdev --remote"
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.4",

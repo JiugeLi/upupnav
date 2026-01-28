@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { X, Download, Upload, AlertTriangle, Check, Loader2, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { X, Download, Upload, AlertTriangle, Check, Loader2, Lock, Shield } from 'lucide-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose, onDataChange, onOpenChangePassword }: SettingsModalProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,7 +107,25 @@ export default function SettingsModal({ isOpen, onClose, onDataChange, onOpenCha
 
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">账号安全</h3>
-            
+
+            <button
+              onClick={() => {
+                onClose();
+                router.push('/admin');
+              }}
+              className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm text-red-600 group-hover:scale-110 transition-transform">
+                  <Shield size={20} />
+                </div>
+                <div className="text-left">
+                  <div className="font-medium text-slate-900">管理后台</div>
+                  <div className="text-xs text-slate-500">用户、链接、数据管理</div>
+                </div>
+              </div>
+            </button>
+
             <button
               onClick={() => {
                 onClose();
@@ -172,7 +192,7 @@ export default function SettingsModal({ isOpen, onClose, onDataChange, onOpenCha
 
           <div className="pt-4 border-t border-slate-100">
             <p className="text-xs text-slate-400 text-center">
-              UpUpNav v1.0.0
+              NavDev v1.0.0
             </p>
           </div>
         </div>

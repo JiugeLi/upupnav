@@ -9,10 +9,11 @@ import GroupModal from './GroupModal';
 import WebsiteModal from './WebsiteModal';
 import SettingsModal from './SettingsModal';
 import ChangePasswordModal from './ChangePasswordModal';
-import { 
-  Search, Plus, Settings, LogOut, Trash2, Edit2, 
+import LinkCheckerModal from './LinkCheckerModal';
+import {
+  Search, Plus, Settings, LogOut, Trash2, Edit2,
   LayoutGrid, FolderOpen, Globe, ChevronRight,
-  Menu, X
+  Menu, X, CheckCircle, Link2, MousePointerClick, Calendar
 } from 'lucide-react';
 
 
@@ -86,6 +87,12 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userSession, setUserSession] = useState<ReturnType<typeof getUserSession>>(null);
+  const [stats, setStats] = useState({
+    totalLinks: 0,
+    totalClicks: 0,
+    weeklyClicks: 0,
+    newLinksThisWeek: 0,
+  });
 
   // Modals
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -93,6 +100,7 @@ export default function Dashboard() {
   const [showWebsiteModal, setShowWebsiteModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [showLinkCheckerModal, setShowLinkCheckerModal] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [editingWebsite, setEditingWebsite] = useState<Website | null>(null);
 
@@ -125,7 +133,11 @@ export default function Dashboard() {
 
       const websitesData = await apiGet<Website[]>('/api/websites');
       setWebsites(websitesData);
-      
+
+      // Fetch stats
+      const statsData = await apiGet('/api/stats');
+      setStats(statsData);
+
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch data', error);
@@ -266,7 +278,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
               <LayoutGrid className="text-blue-600" size={24} />
-              UpUpNav
+              NavDev
             </h1>
             <button 
               className="lg:hidden p-2 text-slate-400 hover:text-slate-600"
@@ -291,48 +303,58 @@ export default function Dashboard() {
             )}
           </div>
           
-          {visibleGroups.map(group => (
-            <div 
-              key={group.id}
-              className={`group flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 ${
-                activeGroupId === group.id 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-100' 
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              }`}
-              onClick={() => {
-                setActiveGroupId(group.id);
-                setSidebarOpen(false);
-              }}
-            >
-              <div className="flex items-center gap-3 truncate">
-                <span className={`text-lg transition-transform duration-200 ${activeGroupId === group.id ? 'scale-110' : 'group-hover:scale-110'}`}>
-                  {group.icon || '📁'}
-                </span>
-                <span className="font-medium truncate">{group.name}</span>
-              </div>
-              
-              {userSession && (
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setEditingGroup(group); setShowGroupModal(true); }}
-                    className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-blue-600 shadow-sm transition-all hover:scale-105"
-                  >
-                    <Edit2 size={14} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group.id); }}
-                    className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-red-600 shadow-sm transition-all hover:scale-105"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+          {visibleGroups.map(group => {
+            const groupWebsiteCount = websites.filter(w => w.group_id === group.id).length;
+            return (
+              <div
+                key={group.id}
+                className={`group flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 ${
+                  activeGroupId === group.id
+                    ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-100'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+                onClick={() => {
+                  setActiveGroupId(group.id);
+                  setSidebarOpen(false);
+                }}
+              >
+                <div className="flex items-center gap-3 truncate flex-1">
+                  <span className={`text-lg transition-transform duration-200 ${activeGroupId === group.id ? 'scale-110' : 'group-hover:scale-110'}`}>
+                    {group.icon || '📁'}
+                  </span>
+                  <span className="font-medium truncate">{group.name}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    activeGroupId === group.id
+                      ? 'bg-blue-200 text-blue-700'
+                      : 'bg-slate-200 text-slate-600'
+                  }`}>
+                    {groupWebsiteCount}
+                  </span>
                 </div>
-              )}
-              
-              {!userSession && activeGroupId === group.id && (
-                <ChevronRight size={16} className="text-blue-400" />
-              )}
-            </div>
-          ))}
+
+                {userSession && (
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setEditingGroup(group); setShowGroupModal(true); }}
+                      className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-blue-600 shadow-sm transition-all hover:scale-105"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group.id); }}
+                      className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-red-600 shadow-sm transition-all hover:scale-105"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )}
+
+                {!userSession && activeGroupId === group.id && (
+                  <ChevronRight size={16} className="text-blue-400" />
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <div className="p-4 border-t border-slate-100 bg-slate-50/50">
@@ -383,7 +405,7 @@ export default function Dashboard() {
             >
               <Menu size={24} />
             </button>
-            <span className="font-bold text-slate-900">UpUpNav</span>
+            <span className="font-bold text-slate-900">NavDev</span>
           </div>
 
           <div className="hidden lg:block relative w-full max-w-md group">
@@ -401,13 +423,23 @@ export default function Dashboard() {
           
           <div className="flex items-center gap-4 ml-auto lg:ml-0">
             {userSession && (
-              <button
-                onClick={() => { setEditingWebsite(null); setShowWebsiteModal(true); }}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-95"
-              >
-                <Plus size={18} />
-                <span className="hidden sm:inline">添加网站</span>
-              </button>
+              <>
+                <button
+                  onClick={() => setShowLinkCheckerModal(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 hover:shadow-lg hover:shadow-green-500/30 transition-all active:scale-95"
+                  title="检查所有链接"
+                >
+                  <CheckCircle size={18} />
+                  <span className="hidden sm:inline">检查链接</span>
+                </button>
+                <button
+                  onClick={() => { setEditingWebsite(null); setShowWebsiteModal(true); }}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-95"
+                >
+                  <Plus size={18} />
+                  <span className="hidden sm:inline">添加网站</span>
+                </button>
+              </>
             )}
           </div>
         </header>
@@ -415,25 +447,55 @@ export default function Dashboard() {
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto px-6 lg:px-8 pb-8 z-10 custom-scrollbar">
           <div className="max-w-[1920px] mx-auto">
-            <div className="mb-8">
-              <h2 className="text-2xl lg:text-3xl font-bold text-slate-800 flex items-center gap-3">
-                {searchQuery ? (
-                  <>
-                    <Search className="text-blue-500" size={28} />
-                    搜索结果
-                  </>
-                ) : (
-                  <>
-                    <span className="text-4xl shadow-sm bg-white rounded-xl p-1">{activeGroup?.icon}</span>
-                    <span className="bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                      {activeGroup?.name}
-                    </span>
-                  </>
-                )}
-              </h2>
-              <p className="text-slate-500 mt-2 ml-1">
-                共 {filteredWebsites.length} 个网站
-              </p>
+            {/* Stats Panel - Always visible */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white shadow-lg shadow-blue-500/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-blue-100 text-xs font-medium">总链接数</p>
+                    <p className="text-2xl font-bold mt-1">{stats.totalLinks}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Link2 size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white shadow-lg shadow-emerald-500/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-emerald-100 text-xs font-medium">总点击量</p>
+                    <p className="text-2xl font-bold mt-1">{stats.totalClicks}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <MousePointerClick size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl p-4 text-white shadow-lg shadow-violet-500/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-violet-100 text-xs font-medium">本周点击</p>
+                    <p className="text-2xl font-bold mt-1">{stats.weeklyClicks}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Calendar size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-4 text-white shadow-lg shadow-amber-500/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-amber-100 text-xs font-medium">本周新增</p>
+                    <p className="text-2xl font-bold mt-1">{stats.newLinksThisWeek}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Plus size={20} />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {filteredWebsites.length === 0 ? (
@@ -564,6 +626,12 @@ export default function Dashboard() {
       <ChangePasswordModal
         isOpen={showChangePasswordModal}
         onClose={() => setShowChangePasswordModal(false)}
+      />
+
+      <LinkCheckerModal
+        isOpen={showLinkCheckerModal}
+        onClose={() => setShowLinkCheckerModal(false)}
+        onDataChanged={fetchData}
       />
     </div>
   );

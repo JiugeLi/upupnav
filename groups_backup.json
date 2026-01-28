@@ -1,0 +1,217 @@
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+[
+  {
+    "results": [
+      {
+        "id": 1,
+        "name": "Home",
+        "icon": "🏠",
+        "sort_order": 0,
+        "created_at": "2025-12-12 08:24:15",
+        "user_id": 1
+      },
+      {
+        "id": 2,
+        "name": "ITMC",
+        "icon": "🌐",
+        "sort_order": 1,
+        "created_at": "2025-12-12 08:24:16",
+        "user_id": 1
+      },
+      {
+        "id": 3,
+        "name": "投资",
+        "icon": "📁",
+        "sort_order": 1,
+        "created_at": "2025-12-12 08:24:16",
+        "user_id": 1
+      },
+      {
+        "id": 4,
+        "name": "AI",
+        "icon": "🤖",
+        "sort_order": 2,
+        "created_at": "2025-12-12 08:24:16",
+        "user_id": 1
+      },
+      {
+        "id": 5,
+        "name": "Code",
+        "icon": "💻",
+        "sort_order": 3,
+        "created_at": "2025-12-12 08:24:16",
+        "user_id": 1
+      },
+      {
+        "id": 6,
+        "name": "Pan",
+        "icon": "📁",
+        "sort_order": 4,
+        "created_at": "2025-12-12 08:24:16",
+        "user_id": 1
+      },
+      {
+        "id": 7,
+        "name": "博客推广",
+        "icon": "📁",
+        "sort_order": 4,
+        "created_at": "2025-12-12 08:24:16",
+        "user_id": 1
+      },
+      {
+        "id": 8,
+        "name": "Media",
+        "icon": "📱",
+        "sort_order": 5,
+        "created_at": "2025-12-12 08:24:16",
+        "user_id": 1
+      },
+      {
+        "id": 9,
+        "name": "Library",
+        "icon": "🌐",
+        "sort_order": 6,
+        "created_at": "2025-12-12 08:24:16",
+        "user_id": 1
+      },
+      {
+        "id": 10,
+        "name": "营销中心",
+        "icon": "📁",
+        "sort_order": 6,
+        "created_at": "2025-12-12 08:24:16",
+        "user_id": 1
+      },
+      {
+        "id": 11,
+        "name": "Agents",
+        "icon": "🔮",
+        "sort_order": 7,
+        "created_at": "2025-12-12 08:24:17",
+        "user_id": 1
+      },
+      {
+        "id": 12,
+        "name": "Google",
+        "icon": "📁",
+        "sort_order": 9,
+        "created_at": "2025-12-12 08:24:17",
+        "user_id": 1
+      },
+      {
+        "id": 13,
+        "name": "编程",
+        "icon": "📁",
+        "sort_order": 12,
+        "created_at": "2025-12-12 08:24:17",
+        "user_id": 1
+      },
+      {
+        "id": 14,
+        "name": "浏览器",
+        "icon": "📁",
+        "sort_order": 14,
+        "created_at": "2025-12-12 08:24:17",
+        "user_id": 1
+      },
+      {
+        "id": 15,
+        "name": "Lenovo",
+        "icon": "📁",
+        "sort_order": 16,
+        "created_at": "2025-12-12 08:24:17",
+        "user_id": 1
+      },
+      {
+        "id": 16,
+        "name": "数据观察",
+        "icon": "📁",
+        "sort_order": 18,
+        "created_at": "2025-12-12 08:24:17",
+        "user_id": 1
+      },
+      {
+        "id": 17,
+        "name": "英语",
+        "icon": "📁",
+        "sort_order": 24,
+        "created_at": "2025-12-12 08:24:17",
+        "user_id": 1
+      },
+      {
+        "id": 18,
+        "name": "Vue电子书",
+        "icon": "📁",
+        "sort_order": 26,
+        "created_at": "2025-12-12 08:24:17",
+        "user_id": 1
+      },
+      {
+        "id": 19,
+        "name": "未分类书签",
+        "icon": "📌",
+        "sort_order": 27,
+        "created_at": "2025-12-12 08:24:18",
+        "user_id": 1
+      },
+      {
+        "id": 21,
+        "name": "智能体服务",
+        "icon": "✨",
+        "sort_order": 0,
+        "created_at": "2025-12-17 05:39:20",
+        "user_id": 1
+      },
+      {
+        "id": 22,
+        "name": "电子邮件服务",
+        "icon": "✨",
+        "sort_order": 0,
+        "created_at": "2025-12-25 02:38:42",
+        "user_id": 1
+      },
+      {
+        "id": 23,
+        "name": "在线笔记",
+        "icon": "✨",
+        "sort_order": 0,
+        "created_at": "2025-12-25 03:44:03",
+        "user_id": 1
+      },
+      {
+        "id": 24,
+        "name": "设计工具",
+        "icon": "✨",
+        "sort_order": 0,
+        "created_at": "2026-01-12 01:53:12",
+        "user_id": 1
+      },
+      {
+        "id": 25,
+        "name": "软件产品",
+        "icon": "✨",
+        "sort_order": 0,
+        "created_at": "2026-01-14 10:00:10",
+        "user_id": 1
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "APAC",
+      "served_by_colo": "KIX",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.338
+      },
+      "duration": 0.338,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 69632,
+      "rows_read": 24,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]

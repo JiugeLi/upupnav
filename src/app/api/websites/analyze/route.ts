@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import * as cheerio from 'cheerio';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 function resolveUrl(href: string, baseUrl: string) {
@@ -8,6 +7,17 @@ function resolveUrl(href: string, baseUrl: string) {
   } catch (e) {
     return href;
   }
+}
+
+function extractMetaContent(html: string, patterns: string[]): string {
+  for (const pattern of patterns) {
+    const regex = new RegExp(pattern, 'i');
+    const match = html.match(regex);
+    if (match && match[1]) {
+      return match[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    }
+  }
+  return '';
 }
 
 async function getAiAnalysis(title: string, rawDescription: string, url: string) {
@@ -55,7 +65,9 @@ export async function POST(req: Request) {
   try {
     const body = await req.json() as { url: string };
     inputUrl = body.url;
-    if (!inputUrl) return new NextResponse('URL is required', { status: 400 });
+    if (!inputUrl) {
+      return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+    }
 
     // Add protocol if missing
     let targetUrl = inputUrl;
@@ -63,54 +75,81 @@ export async function POST(req: Request) {
         targetUrl = `https://${inputUrl}`;
     }
 
-    const response = await fetch(targetUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-      },
-      next: { revalidate: 3600 } // Cache for 1 hour
-    });
-
-    const html = await response.text();
-    const $ = cheerio.load(html);
-
-    // Get Title
-    let title = $('title').text().trim() || 
-                $('meta[property="og:title"]').attr('content') || 
-                $('meta[name="twitter:title"]').attr('content') ||
-                '';
-    
-    // Get Description
-    let description = $('meta[name="description"]').attr('content') || 
-                        $('meta[property="og:description"]').attr('content') || 
-                        $('meta[name="twitter:description"]').attr('content') ||
-                        '';
-
-    let category = '';
-
-    // 使用 Cloudflare Workers AI 进行智能分析
-    const aiData = await getAiAnalysis(title, description, targetUrl);
-    if (aiData) {
-        if (aiData.name) title = aiData.name;
-        if (aiData.summary) description = aiData.summary;
-        if (aiData.category) category = aiData.category;
-    }
-
-    // Get Logo
-    let logoUrl = '';
-    // Priority: icon > shortcut icon > apple-touch-icon
-    const iconLink = $('link[rel="icon"]').last().attr('href') || 
-                     $('link[rel="shortcut icon"]').last().attr('href') ||
-                     $('link[rel="apple-touch-icon"]').attr('href');
-    
     const urlObj = new URL(targetUrl);
     
-    if (iconLink) {
-        logoUrl = resolveUrl(iconLink, targetUrl);
-    } else {
-        // Fallback to Google Favicon service
-        logoUrl = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
+    // 默认返回值
+    let title = '';
+    let description = '';
+    let category = '';
+    let logoUrl = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
+
+    try {
+      const { env } = getCloudflareContext();
+      
+      const response = await fetch(targetUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        }
+      });
+
+      const html = await response.text();
+
+      // 使用正则表达式提取信息（避免使用 cheerio，因为它在 Workers 环境中有兼容性问题）
+      
+      // Get Title
+      title = extractMetaContent(html, [
+        '<title[^>]*>([^<]+)</title>',
+        '<meta\\s+property="og:title"\\s+content="([^"]+)"',
+        '<meta\\s+name="twitter:title"\\s+content="([^"]+)"'
+      ]);
+      
+      // Get Description
+      description = extractMetaContent(html, [
+        '<meta\\s+name="description"\\s+content="([^"]+)"',
+        '<meta\\s+property="og:description"\\s+content="([^"]+)"',
+        '<meta\\s+name="twitter:description"\\s+content="([^"]+)"'
+      ]);
+
+      // Get Logo
+      const iconLink = extractMetaContent(html, [
+        '<link\\s+rel="icon"[^>]+href="([^"]+)"',
+        '<link\\s+rel="shortcut icon"[^>]+href="([^"]+)"',
+        '<link\\s+rel="apple-touch-icon"[^>]+href="([^"]+)"'
+      ]);
+      
+      if (iconLink) {
+          logoUrl = resolveUrl(iconLink, targetUrl);
+      }
+
+      // 使用 Cloudflare Workers AI 进行智能分析（可选，失败不影响返回）
+      // 暂时禁用 AI 调用进行测试
+      /*
+      if ((title || description) && env.AI) {
+        try {
+          // 使用 Promise.race 实现超时
+          const aiPromise = getAiAnalysis(title, description, targetUrl);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('AI timeout')), 15000)
+          );
+          
+          const aiData = await Promise.race([aiPromise, timeoutPromise]) as any;
+          
+          if (aiData) {
+              if (aiData.name) title = aiData.name;
+              if (aiData.summary) description = aiData.summary;
+              if (aiData.category) category = aiData.category;
+          }
+        } catch (aiError) {
+          console.error('[AI_ANALYSIS_ERROR]', aiError);
+          // AI 失败不影响返回基本信息
+        }
+      }
+      */
+    } catch (fetchError) {
+      console.error('[FETCH_ERROR]', fetchError);
+      // Fetch 失败也返回基本信息
     }
 
     return NextResponse.json({ 
@@ -122,23 +161,14 @@ export async function POST(req: Request) {
     });
 
   } catch (error) {
-    console.error('[ANALYZE_URL]', error);
-    // Even if fetch fails, we can return the URL and maybe a default logo
-    try {
-        let targetUrl = inputUrl;
-        if (!inputUrl.startsWith('http://') && !inputUrl.startsWith('https://')) {
-            targetUrl = `https://${inputUrl}`;
-        }
-        const urlObj = new URL(targetUrl);
-        return NextResponse.json({
-            title: '',
-            description: '',
-            category: '',
-            logoUrl: `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`,
-            url: targetUrl
-        });
-    } catch {
-        return new NextResponse('Failed to analyze URL', { status: 500 });
-    }
+    console.error('[ANALYZE_URL_ERROR]', error);
+    // 返回 JSON 错误而不是纯文本
+    return NextResponse.json(
+      { 
+        error: 'Failed to analyze URL',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      }, 
+      { status: 500 }
+    );
   }
 }
