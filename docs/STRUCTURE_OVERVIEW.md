@@ -3,7 +3,7 @@
 ## 根目录文件
 
 ```
-upupnav/
+jiugenav/
 ├── README.md              # 项目主文档（唯一保留在根目录的文档）
 ├── LICENSE                # MIT 许可证
 ├── package.json           # 项目依赖和脚本

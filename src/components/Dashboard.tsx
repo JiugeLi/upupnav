@@ -360,15 +360,13 @@ export default function Dashboard() {
         <div className="p-4 border-t border-slate-100 bg-slate-50/50">
           {userSession ? (
             <div className="space-y-2">
-              {isAdmin && (
-                <button
-                  onClick={() => setShowSettingsModal(true)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 rounded-xl transition-all shadow-sm"
-                >
-                  <Settings size={18} />
-                  <span>设置</span>
-                </button>
-              )}
+              <button
+                onClick={() => setShowSettingsModal(true)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 rounded-xl transition-all shadow-sm"
+              >
+                <Settings size={18} />
+                <span>设置</span>
+              </button>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
@@ -621,6 +619,7 @@ export default function Dashboard() {
         onClose={() => setShowSettingsModal(false)}
         onDataChange={fetchData}
         onOpenChangePassword={() => setShowChangePasswordModal(true)}
+        isAdmin={isAdmin}
       />
 
       <ChangePasswordModal

@@ -27,7 +27,7 @@ export async function POST(
     const result = await db.update(websites)
         .set({
             click_count: sql`${websites.click_count} + 1`,
-            last_clicked_at: new Date(),
+            last_clicked_at: Math.floor(Date.now() / 1000), // Unix timestamp in seconds
         })
         .where(and(
           eq(websites.id, parseInt(id)),

@@ -35,7 +35,7 @@ main = ".open-next/worker.js"  # Workers 入口文件
 # D1 数据库绑定
 [[d1_databases]]
 binding = "DB"
-database_name = "upupnav"
+database_name = "jiugenav"
 database_id = "your-database-id"
 
 # Workers AI 绑定

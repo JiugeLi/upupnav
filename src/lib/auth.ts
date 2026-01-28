@@ -71,7 +71,7 @@ export async function changePassword(newPassword: string): Promise<boolean> {
 }
 
 // 客户端使用 localStorage 存储登录状态
-export const AUTH_KEY = 'upupnav_admin_auth';
+export const AUTH_KEY = 'jiugenav_admin_auth';
 
 export function isLoggedIn(): boolean {
   if (typeof window === 'undefined') return false;

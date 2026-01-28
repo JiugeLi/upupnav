@@ -27,11 +27,11 @@ function parseWranglerJson(output) {
 console.log('📦 正在从生产环境导出数据...\n');
 
 // 导出分组
-const groupsOutput = runCommand('npx wrangler d1 execute upupnav --remote --command "SELECT * FROM groups ORDER BY id" --json');
+const groupsOutput = runCommand('npx wrangler d1 execute jiugenav --remote --command "SELECT * FROM groups ORDER BY id" --json');
 const groupsData = parseWranglerJson(groupsOutput);
 
 // 导出网站
-const websitesOutput = runCommand('npx wrangler d1 execute upupnav --remote --command "SELECT * FROM websites ORDER BY id" --json');
+const websitesOutput = runCommand('npx wrangler d1 execute jiugenav --remote --command "SELECT * FROM websites ORDER BY id" --json');
 const websitesData = parseWranglerJson(websitesOutput);
 
 if (!groupsData || !websitesData) {
@@ -56,7 +56,7 @@ for (const group of groups) {
   const icon = group.icon.replace(/'/g, "''");
   const sql = `INSERT INTO groups (id, name, icon, sort_order, user_id) VALUES (${group.id}, '${name}', '${icon}', ${group.sort_order}, ${group.user_id})`;
   
-  const result = runCommand(`npx wrangler d1 execute upupnav-dev --remote --command "${sql}"`);
+  const result = runCommand(`npx wrangler d1 execute jiugenav-dev --remote --command "${sql}"`);
   
   if (result.includes('Success') || result.includes('Executed')) {
     groupSuccess++;
@@ -81,7 +81,7 @@ for (const website of websites) {
   
   const sql = `INSERT INTO websites (id, name, url, description, logo_url, group_id, sort_order, click_count, user_id) VALUES (${website.id}, '${name}', '${url}', '${desc}', '${logo}', ${website.group_id}, ${website.sort_order}, ${clickCount}, ${website.user_id})`;
   
-  const result = runCommand(`npx wrangler d1 execute upupnav-dev --remote --command "${sql}"`);
+  const result = runCommand(`npx wrangler d1 execute jiugenav-dev --remote --command "${sql}"`);
   
   if (result.includes('Success') || result.includes('Executed')) {
     websiteSuccess++;

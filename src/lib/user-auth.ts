@@ -89,7 +89,7 @@ export async function getUserById(userId: number): Promise<UserSession | null> {
 }
 
 // 客户端会话管理
-export const USER_SESSION_KEY = 'upupnav_user_session';
+export const USER_SESSION_KEY = 'jiugenav_user_session';
 
 export function saveUserSession(session: UserSession): void {
   if (typeof window === 'undefined') return;

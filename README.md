@@ -1,4 +1,4 @@
-# UpUpNav
+# jiugeNav
 
 一个现代化的个人网站导航管理系统，基于 Next.js 14 和 Cloudflare D1 构建，可部署在 Cloudflare Workers 上实现全球低延迟访问。
 
@@ -28,7 +28,7 @@
 
 ```bash
 git clone <your-repo-url>
-cd upupnav
+cd jiugenav
 npm install
 ```
 
@@ -36,7 +36,7 @@ npm install
 
 ```bash
 # 创建 Cloudflare D1 数据库
-wrangler d1 create upupnav
+wrangler d1 create jiugenav
 
 # 将返回的 database_id 更新到 wrangler.toml 中
 ```
@@ -45,7 +45,7 @@ wrangler d1 create upupnav
 ```toml
 [[d1_databases]]
 binding = "DB"
-database_name = "upupnav"
+database_name = "jiugenav"
 database_id = "your-database-id-here"  # 替换为你的数据库 ID
 migrations_dir = "drizzle"
 ```

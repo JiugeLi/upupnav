@@ -1,14 +1,14 @@
 # 贡献指南
 
-感谢你对 UpUpNav 项目的关注！
+感谢你对 jiugeNav 项目的关注！
 
 ## 开发环境设置
 
 1. Fork 本仓库
 2. 克隆你的 fork
    ```bash
-   git clone https://github.com/your-username/upupnav.git
-   cd upupnav
+   git clone https://github.com/your-username/jiugenav.git
+   cd jiugenav
    ```
 3. 安装依赖
    ```bash
@@ -21,7 +21,7 @@
    ```
 5. 创建数据库并迁移
    ```bash
-   wrangler d1 create upupnav
+   wrangler d1 create jiugenav
    npm run db:migrate:local
    ```
 6. 启动开发服务器

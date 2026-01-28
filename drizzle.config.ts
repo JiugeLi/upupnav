@@ -6,6 +6,6 @@ export default {
   driver: 'd1',
   dbCredentials: {
     wranglerConfigPath: 'wrangler.toml',
-    dbName: 'upupnav-db',
+    dbName: 'jiugenav-db',
   },
 } satisfies Config;

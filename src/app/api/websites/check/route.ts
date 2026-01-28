@@ -26,7 +26,7 @@ async function checkLink(url: string): Promise<CheckResult> {
       redirect: 'follow',
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; UpUpNav LinkChecker)',
+        'User-Agent': 'Mozilla/5.0 (compatible; jiugeNav LinkChecker)',
       },
     }).catch(async (err) => {
       // If HEAD fails, try GET
@@ -38,7 +38,7 @@ async function checkLink(url: string): Promise<CheckResult> {
         redirect: 'follow',
         signal: controller.signal,
         headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; UpUpNav LinkChecker)',
+          'User-Agent': 'Mozilla/5.0 (compatible; jiugeNav LinkChecker)',
         },
       });
     });

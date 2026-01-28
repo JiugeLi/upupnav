@@ -1,6 +1,6 @@
-# 📚 UpUpNav 文档中心
+# 📚 jiugeNav 文档中心
 
-欢迎来到 UpUpNav 的文档中心！这里包含了项目的所有详细文档。
+欢迎来到 jiugeNav 的文档中心！这里包含了项目的所有详细文档。
 
 ## 📖 文档导航
 
@@ -48,7 +48,7 @@
 
 ## 🔗 相关链接
 
-- [GitHub 仓库](https://github.com/your-username/upupnav)
+- [GitHub 仓库](https://github.com/your-username/jiugenav)
 - [在线演示](https://cloud-nav.hgzlb202.workers.dev)
 - [Cloudflare Workers 文档](https://developers.cloudflare.com/workers/)
 - [Cloudflare Workers AI 文档](https://developers.cloudflare.com/workers-ai/)

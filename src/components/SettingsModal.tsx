@@ -7,9 +7,10 @@ interface SettingsModalProps {
   onClose: () => void;
   onDataChange: () => void;
   onOpenChangePassword: () => void;
+  isAdmin?: boolean;
 }
 
-export default function SettingsModal({ isOpen, onClose, onDataChange, onOpenChangePassword }: SettingsModalProps) {
+export default function SettingsModal({ isOpen, onClose, onDataChange, onOpenChangePassword, isAdmin = false }: SettingsModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -27,7 +28,7 @@ export default function SettingsModal({ isOpen, onClose, onDataChange, onOpenCha
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `upupnav-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `jiugenav-backup-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -105,45 +106,47 @@ export default function SettingsModal({ isOpen, onClose, onDataChange, onOpenCha
             </div>
           )}
 
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">账号安全</h3>
+          {isAdmin && (
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">账号安全</h3>
 
-            <button
-              onClick={() => {
-                onClose();
-                router.push('/admin');
-              }}
-              className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm text-red-600 group-hover:scale-110 transition-transform">
-                  <Shield size={20} />
+              <button
+                onClick={() => {
+                  onClose();
+                  router.push('/admin');
+                }}
+                className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm text-red-600 group-hover:scale-110 transition-transform">
+                    <Shield size={20} />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-medium text-slate-900">管理后台</div>
+                    <div className="text-xs text-slate-500">用户、链接、数据管理</div>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <div className="font-medium text-slate-900">管理后台</div>
-                  <div className="text-xs text-slate-500">用户、链接、数据管理</div>
-                </div>
-              </div>
-            </button>
+              </button>
 
-            <button
-              onClick={() => {
-                onClose();
-                onOpenChangePassword();
-              }}
-              className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm text-purple-600 group-hover:scale-110 transition-transform">
-                  <Lock size={20} />
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenChangePassword();
+                }}
+                className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm text-purple-600 group-hover:scale-110 transition-transform">
+                    <Lock size={20} />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-medium text-slate-900">修改密码</div>
+                    <div className="text-xs text-slate-500">更改管理员密码</div>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <div className="font-medium text-slate-900">修改密码</div>
-                  <div className="text-xs text-slate-500">更改管理员密码</div>
-                </div>
-              </div>
-            </button>
-          </div>
+              </button>
+            </div>
+          )}
 
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">数据管理</h3>

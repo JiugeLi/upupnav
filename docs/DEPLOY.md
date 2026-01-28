@@ -20,7 +20,7 @@ npm install
 
 ```bash
 # 创建 D1 数据库
-wrangler d1 create upupnav
+wrangler d1 create jiugenav
 
 # 将返回的 database_id 更新到 wrangler.toml 中
 ```
@@ -29,7 +29,7 @@ wrangler d1 create upupnav
 ```toml
 [[d1_databases]]
 binding = "DB"
-database_name = "upupnav"
+database_name = "jiugenav"
 database_id = "your-database-id-here"  # 替换为你的数据库 ID
 ```
 
@@ -90,7 +90,7 @@ assets = { directory = ".open-next/assets", binding = "ASSETS" }
 
 [[d1_databases]]
 binding = "DB"
-database_name = "upupnav"
+database_name = "jiugenav"
 database_id = "your-database-id-here"  # 替换为你的数据库 ID
 migrations_dir = "drizzle"
 ```

@@ -3,7 +3,7 @@
 ## �� 目录结构
 
 ```
-upupnav/
+jiugenav/
 ├── .github/                    # GitHub 配置
 │   ├── ISSUE_TEMPLATE/        # Issue 模板
 │   ├── workflows/             # GitHub Actions

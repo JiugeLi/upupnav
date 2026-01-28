@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     // Calculate the date for 7 days ago (this week)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const sevenDaysAgoStr = sevenDaysAgo.toISOString();
+    const sevenDaysAgoTimestamp = Math.floor(sevenDaysAgo.getTime() / 1000); // Convert to Unix timestamp
 
     // Get total links count
     const totalLinksResult = await db.select({ count: count() })
@@ -36,22 +36,21 @@ export async function GET(req: Request) {
       .where(eq(websites.user_id, userId));
     const totalClicks = totalClicksResult[0]?.total || 0;
 
-    // Get clicks from this week (we need to estimate since we don't track per-click timestamps)
-    // We'll use the last_clicked_at as a proxy - count websites clicked in last 7 days
-    const recentClicksResult = await db.select({ count: count() })
+    // Get clicks from this week - sum click_count for websites clicked in last 7 days
+    const weeklyClicksResult = await db.select({ 
+      total: sql<number>`COALESCE(SUM(${websites.click_count}), 0)` 
+    })
       .from(websites)
       .where(
-        eq(websites.user_id, userId)
+        sql`${websites.user_id} = ${userId} AND ${websites.last_clicked_at} >= ${sevenDaysAgoTimestamp}`
       );
-    // Since we don't have detailed click history, we'll estimate based on click_count
-    // For now, return 0 as placeholder for weekly clicks
-    const weeklyClicks = 0;
+    const weeklyClicks = weeklyClicksResult[0]?.total || 0;
 
     // Get new links added this week
     const newLinksResult = await db.select({ count: count() })
       .from(websites)
       .where(
-        sql`${websites.user_id} = ${userId} AND ${websites.created_at} >= ${sevenDaysAgoStr}`
+        sql`${websites.user_id} = ${userId} AND ${websites.created_at} >= ${sevenDaysAgoTimestamp}`
       );
     const newLinksThisWeek = newLinksResult[0]?.count || 0;
 
