@@ -7,7 +7,6 @@
 ### 🚀 快速开始
 - [部署指南](DEPLOY.md) - 如何部署到 Cloudflare Workers
 - [项目结构](PROJECT_STRUCTURE.md) - 了解代码组织
-- [文件结构总览](STRUCTURE_OVERVIEW.md) - 项目文件组织说明
 
 ### 🤖 AI 功能
 - [AI 架构说明](AI_ARCHITECTURE.md) - Cloudflare Workers AI 实现原理
@@ -18,10 +17,6 @@
 ### 👥 参与贡献
 - [贡献指南](CONTRIBUTING.md) - 如何参与项目开发
 - [更新日志](CHANGELOG.md) - 版本更新记录
-
-### 🔧 开发工具
-- [推送检查清单](PUSH_CHECKLIST.md) - GitHub 推送前的检查项
-- [准备就绪报告](READY_TO_PUSH.md) - 项目状态总结
 
 ## 🎯 快速链接
 

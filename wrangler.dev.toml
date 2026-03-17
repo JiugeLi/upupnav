@@ -8,7 +8,7 @@ assets = { directory = ".open-next/assets", binding = "ASSETS" }
 [[d1_databases]]
 binding = "DB"
 database_name = "jiugenav-dev"
-database_id = "76015c80-4120-4a97-bee0-ed71da98674b"
+database_id = "${D1_DATABASE_ID_DEV}"
 migrations_dir = "drizzle"
 
 # Workers AI 绑定

@@ -12,7 +12,7 @@ invocation_logs = true
 [[d1_databases]]
 binding = "DB"
 database_name = "jiugenav"
-database_id = "ba95fd9d-5306-4cee-b3c0-b141ca87a776"
+database_id = "${D1_DATABASE_ID}"
 migrations_dir = "drizzle"
 
 [ai]
