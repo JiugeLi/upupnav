@@ -3,7 +3,7 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { createDb } from '@/db';
 import { users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import type { GoogleUserInfo } from './google-auth';
 
 export interface UserSession {
@@ -14,6 +14,9 @@ export interface UserSession {
   isAdmin: boolean;
 }
 
+// 检查是否在本地开发环境
+const isLocalDev = typeof process.env.WRANGLER === 'undefined';
+
 /**
  * 通过 Google 信息登录或注册用户
  * @param googleInfo Google 用户信息
@@ -21,12 +24,25 @@ export interface UserSession {
  */
 export async function loginOrCreateUserWithGoogle(googleInfo: GoogleUserInfo): Promise<UserSession | null> {
   try {
-    const { env } = getCloudflareContext();
-    const db = createDb(env.DB);
-    
+    let db: any;
+
+    if (isLocalDev && process.env.D1_DATABASE_ID && process.env.CLOUDFLARE_ACCOUNT_ID) {
+      // 本地开发模式：使用 HTTP 代理连接远程 D1
+      db = createDb(null);
+    } else {
+      // Cloudflare Workers 模式
+      const { env } = getCloudflareContext();
+      db = createDb(env.DB);
+    }
+
+    if (!db) {
+      console.warn('[AUTH] DB not available');
+      return null;
+    }
+
     // 查找用户
     let user = await db.select().from(users).where(eq(users.google_id, googleInfo.id)).limit(1);
-    
+
     if (user.length === 0) {
       // 用户不存在，创建新用户
       const result = await db.insert(users).values({
@@ -36,7 +52,7 @@ export async function loginOrCreateUserWithGoogle(googleInfo: GoogleUserInfo): P
         google_id: googleInfo.id,
         last_login: new Date(),
       }).returning();
-      
+
       user = result;
       console.log('[AUTH] New user created:', googleInfo.email);
     } else {
@@ -45,7 +61,7 @@ export async function loginOrCreateUserWithGoogle(googleInfo: GoogleUserInfo): P
         .set({ last_login: new Date() })
         .where(eq(users.id, user[0].id));
     }
-    
+
     return {
       userId: user[0].id,
       email: user[0].email,
@@ -66,15 +82,28 @@ export async function loginOrCreateUserWithGoogle(googleInfo: GoogleUserInfo): P
  */
 export async function getUserById(userId: number): Promise<UserSession | null> {
   try {
-    const { env } = getCloudflareContext();
-    const db = createDb(env.DB);
-    
+    let db: any;
+
+    if (isLocalDev && process.env.D1_DATABASE_ID && process.env.CLOUDFLARE_ACCOUNT_ID) {
+      // 本地开发模式：使用 HTTP 代理连接远程 D1
+      db = createDb(null);
+    } else {
+      // Cloudflare Workers 模式
+      const { env } = getCloudflareContext();
+      db = createDb(env.DB);
+    }
+
+    if (!db) {
+      console.warn('[AUTH] DB not available');
+      return null;
+    }
+
     const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    
+
     if (result.length === 0) {
       return null;
     }
-    
+
     return {
       userId: result[0].id,
       email: result[0].email,

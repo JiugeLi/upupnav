@@ -4,6 +4,10 @@ compatibility_flags = ["nodejs_compat"]
 main = ".open-next/worker.js"
 assets = { directory = ".open-next/assets", binding = "ASSETS" }
 
+routes = [
+  { pattern = "nav.jiuge.ai", custom_domain = true }
+]
+
 [observability.logs]
 enabled = true
 head_sampling_rate = 1
@@ -12,7 +16,7 @@ invocation_logs = true
 [[d1_databases]]
 binding = "DB"
 database_name = "jiugenav"
-database_id = "${D1_DATABASE_ID}"
+database_id = "54340279-33f5-4f57-98db-c70316233a49"
 migrations_dir = "drizzle"
 
 [ai]

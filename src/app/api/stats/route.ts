@@ -55,7 +55,7 @@ export async function GET(req: Request) {
 
     // Get total click count by summing all click_count values
     const websitesData = await db.select({ click_count: websites.click_count }).from(websites).where(eq(websites.user_id, userId));
-    const totalClicks = websitesData.reduce((sum, w) => sum + (w.click_count || 0), 0);
+    const totalClicks = websitesData.reduce((sum: number, w: { click_count: number | null }) => sum + (w.click_count || 0), 0);
 
     // Get clicks from this week - sum click_count for websites clicked in last 7 days
     // Use sql for timestamp comparison since fields are stored as integers
@@ -66,7 +66,7 @@ export async function GET(req: Request) {
       .where(
         sql`${websites.user_id} = ${userId} AND ${websites.last_clicked_at} >= ${sevenDaysAgoTimestamp}`
       );
-    const weeklyClicks = weeklyWebsites.reduce((sum, w) => sum + (w.click_count || 0), 0);
+    const weeklyClicks = weeklyWebsites.reduce((sum: number, w: { click_count: number | null }) => sum + (w.click_count || 0), 0);
 
     // Get new links added this week
     const newLinksThisWeekResult = await db.select({ id: websites.id })

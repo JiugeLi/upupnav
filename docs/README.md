@@ -34,6 +34,44 @@
 - Drizzle ORM
 - Tailwind CSS
 
+## 🖥️ 本地开发
+
+### 前置要求
+1. Node.js 18+ 和 npm
+2. Cloudflare 账户
+3. Cloudflare API Token（用于本地访问远程 D1 数据库）
+
+### 配置步骤
+
+1. 复制 `.dev.vars.example` 到 `.dev.vars`（如果存在）
+2. 编辑 `.dev.vars` 文件，配置以下环境变量：
+
+```bash
+# D1 数据库配置
+D1_DATABASE_ID=ba95fd9d-5306-4cee-b3c0-b141ca87a776
+
+# Cloudflare API 配置（用于本地开发连接远程 D1）
+# 获取方式: https://dash.cloudflare.com/profile/api-tokens
+# 需要 D1 模块的编辑权限
+CLOUDFLARE_ACCOUNT_ID=your-account-id-here
+CLOUDFLARE_API_TOKEN=your-api-token-here
+
+# 管理员密码
+ADMIN_PASSWORD=admin123
+```
+
+3. 安装依赖：
+```bash
+npm install
+```
+
+4. 启动开发服务器：
+```bash
+npm run dev
+```
+
+开发服务器将在 http://localhost:3000 启动，并连接到远程 Cloudflare D1 数据库。
+
 ## 📞 获取帮助
 
 如果你在使用过程中遇到问题：

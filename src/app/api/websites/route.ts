@@ -5,20 +5,38 @@ import { NextResponse } from 'next/server';
 import { desc, asc, eq } from 'drizzle-orm';
 import { getCurrentUserId } from '@/lib/get-current-user';
 
+// 本地开发模式标志
+let isLocalDev = false;
+
+// 检查是否在本地开发环境
+try {
+  const { env } = getCloudflareContext();
+  if (!env?.DB) {
+    isLocalDev = true;
+  }
+} catch (e) {
+  isLocalDev = true;
+}
+
 export async function GET(req: Request) {
   try {
+    // 本地开发模式 - 返回空数组
+    if (isLocalDev) {
+      return NextResponse.json([]);
+    }
+
     const { env } = getCloudflareContext();
     if (!env?.DB) {
        return new NextResponse('Database not available', { status: 503 });
     }
     const db = createDb(env.DB);
-    
+
     // 获取当前用户 ID
     const userId = getCurrentUserId(req);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     const result = await db.select().from(websites)
       .where(eq(websites.user_id, userId))
       .orderBy(
@@ -26,7 +44,7 @@ export async function GET(req: Request) {
         desc(websites.click_count),
         asc(websites.sort_order)
       );
-    
+
     return NextResponse.json(result, {
       headers: {
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
@@ -40,15 +58,46 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    // 本地开发模式 - 返回模拟数据
+    if (isLocalDev) {
+      const body = await req.json() as {
+        group_id: string;
+        name: string;
+        url: string;
+        logo_url: string;
+        logo_type: string;
+        description: string;
+        username?: string;
+        password?: string;
+        sort_order: number;
+      };
+      return NextResponse.json({
+        id: Math.floor(Math.random() * 1000),
+        user_id: 1,
+        group_id: parseInt(body.group_id),
+        name: body.name,
+        url: body.url,
+        logo_url: body.logo_url || null,
+        logo_type: body.logo_type || 'default',
+        description: body.description || null,
+        username: body.username || null,
+        password: body.password || null,
+        click_count: 0,
+        last_clicked_at: null,
+        sort_order: body.sort_order || 0,
+        created_at: new Date(),
+      });
+    }
+
     const { env } = getCloudflareContext();
     const db = createDb(env.DB);
-    
+
     // 获取当前用户 ID
     const userId = getCurrentUserId(req);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     const body = await req.json() as {
         group_id: string;
         name: string;

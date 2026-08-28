@@ -14,8 +14,8 @@
     "lint": "next lint",
     "db:generate": "drizzle-kit generate",
     "db:up": "drizzle-kit up",
-    "db:migrate:local": "wrangler d1 migrations apply navdev --local",
-    "db:migrate:prod": "wrangler d1 migrations apply navdev --remote"
+    "db:migrate:local": "wrangler d1 migrations apply jiugenav --local",
+    "db:migrate:prod": "wrangler d1 migrations apply jiugenav --remote"
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.4",

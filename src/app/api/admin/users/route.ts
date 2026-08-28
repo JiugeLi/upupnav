@@ -19,7 +19,7 @@ export async function GET(req: Request) {
 
     // Get stats for each user
     const usersWithStats = await Promise.all(
-      allUsers.map(async (user) => {
+      allUsers.map(async (user: typeof users.$inferSelect) => {
         const [linksResult, groupsResult] = await Promise.all([
           db.select({ count: count() }).from(websites).where(eq(websites.user_id, user.id)),
           db.select({ count: count() }).from(groups).where(eq(groups.user_id, user.id)),
